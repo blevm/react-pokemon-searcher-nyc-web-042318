@@ -12,7 +12,9 @@ class PokemonPage extends React.Component {
       pokemon: null,
       isLoading: false,
       results: null,
-      value: ''
+      value: '',
+      filter: null,
+      sortedPokemon: null
     }
   }
 
@@ -41,12 +43,28 @@ class PokemonPage extends React.Component {
     }, 300)
   }
 
+  sortAtoZ = () => {
+    let sorted = this.state.pokemon.sort((a, b) => {return a.name.localeCompare(b.name)})
+
+    this.setState({sortedPokemon: sorted})
+  }
+
+  sortByHp = () => {
+    let sorted = this.state.pokemon.sort(function(a, b) {
+      console.log(a)
+      console.log(b);
+      return (a.stats.find(stat => stat.name === 'hp').value) - (b.stats.find(stat => stat.name === 'hp').value)
+    })
+
+    this.setState({sortedPokemon: sorted})
+  }
+
   componentDidMount = () => {
     this.fetchAllPokemon()
   }
 
   fetchAllPokemon = () => {
-    fetch(`http://localhost:3000/pokemon`).then(resp => resp.json()).then(pokemon => this.setState({pokemon}))
+    fetch(`http://localhost:3000/pokemon`).then(resp => resp.json()).then(pokemon => this.setState({pokemon, sortedPokemon: pokemon}))
   }
 
   render() {
@@ -65,7 +83,10 @@ class PokemonPage extends React.Component {
             open={false}
             {...this.props} />
         <br />
-        <PokemonCollection pokemon={(this.state.results == undefined) ? this.state.pokemon : this.state.results}/>
+        <button onClick={this.sortAtoZ}>Sort A-Z</button>
+        <button onClick={this.sortByHp}>Sort By HP</button>
+        <br />
+        <PokemonCollection pokemon={(this.state.results == undefined) ? this.state.sortedPokemon : this.state.results}/>
         <br />
         <PokemonForm fetchAllPokemon={this.fetchAllPokemon}/>
       </div>
